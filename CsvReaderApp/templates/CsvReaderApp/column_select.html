@@ -8,6 +8,7 @@
     <form action="{% url 'generate_charts' %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="file_name" value="{{ file_name }}">
+        <h1>Select a column to analyze:</h1>
         {% for column in columns %}
             <label>
                 <input type="radio" name="selected_column" value="{{ column }}" required>
