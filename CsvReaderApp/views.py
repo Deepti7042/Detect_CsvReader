@@ -18,10 +18,7 @@ def upload_file(request):
             with open(file_path, 'wb+') as destination:
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
-            
-            # Check if the file was saved successfully by verifying its existence
             if os.path.exists(file_path):
-                # Redirect to column selection with the filename as a parameter
                 return redirect(reverse('select_column') + f'?file={uploaded_file.name}')
             else:
                 return HttpResponse("Failed to save the file.", status=500)
@@ -42,7 +39,7 @@ def get_csv_columns(file_path):
         try:
             columns = next(reader)
         except StopIteration:
-            columns = []  # Handle empty files
+            columns = []
     return columns
 
 def generate_charts(request):
@@ -63,23 +60,37 @@ def read_csv_and_process(file_path, selected_column):
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            # Parse the string representation of the list into an actual list
+            item = row[selected_column]
             try:
-                defects = ast.literal_eval(row[selected_column])
-                if isinstance(defects, list):
-                    for defect in defects:
+                # Attempt to parse the item as a list
+                parsed_items = ast.literal_eval(item)
+                if isinstance(parsed_items, list):
+                    for defect in parsed_items:
                         defect_counts[defect.strip()] += 1
+                else:
+                    # If not a list, treat it as a single defect
+                    defect_counts[item.strip()] += 1
             except (ValueError, SyntaxError):
-                # Handle cases where the column value is not a valid list
-                print(f"Error parsing {row[selected_column]}")
+                # If parsing fails, treat it as a single defect string
+                defect_counts[item.strip()] += 1
     return defect_counts
 
 def generate_bar_chart(defect_counts, file_name, selected_column):
-    values = list(defect_counts.keys())
-    counts = [defect_counts[value] for value in values]
+    total_counts = sum(defect_counts.values())
+    threshold = total_counts * 0.05  # 5% of total
 
-    fig, ax = plt.subplots()
-    fig, ax = plt.subplots(figsize=(12, 10))
+    # Aggregate small counts into 'Others'
+    aggregated_counts = Counter()
+    for defect, count in defect_counts.items():
+        if count < threshold:
+            aggregated_counts['Others'] += count
+        else:
+            aggregated_counts[defect] = count
+
+    values = list(aggregated_counts.keys())
+    counts = [aggregated_counts[value] for value in values]
+
+    fig, ax = plt.subplots(figsize=(12, 8))
     ax.bar(values, counts, color='skyblue')
     ax.set_xlabel('Values')
     ax.set_ylabel('Count')
@@ -87,7 +98,7 @@ def generate_bar_chart(defect_counts, file_name, selected_column):
     ax.tick_params(axis='x', rotation=45)
 
     file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-    plt.savefig(file_path, format='png')
+    plt.savefig(file_path, format='png', bbox_inches='tight')
     plt.close()
 
     return os.path.join(settings.MEDIA_URL, file_name)
