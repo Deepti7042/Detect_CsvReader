@@ -1,0 +1,33 @@
+<!-- csv_upload_and_chart.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Upload and Chart</title>
+</head>
+<body>
+    <h1>Upload CSV and Select Column for Pie Chart</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload CSV</button>
+    </form>
+
+    {% if columns %}
+    <h2>Select a Column to Generate Pie Chart</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for column in columns %}
+        <label>
+            <input type="radio" name="column" value="{{ column }}" required>{{ column }}
+        </label><br>
+        {% endfor %}
+        <button type="submit">Generate Pie Chart</button>
+    </form>
+    {% endif %}
+
+    {% if chart %}
+    <h2>Pie Chart</h2>
+    <img src="{{ chart }}" alt="Pie Chart">
+    {% endif %}
+</body>
+</html>

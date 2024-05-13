@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Column</title>
+</head>
+<body>
+    <form action="{% url 'generate_charts' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="file_name" value="{{ file_name }}">
+        {% for column in columns %}
+            <label>
+                <input type="radio" name="selected_column" value="{{ column }}" required>
+                {{ column }}
+            </label><br>
+        {% endfor %}
+        <button type="submit">Generate Graph</button>
+    </form>
+</body>
+</html>
