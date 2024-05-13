@@ -1,5 +1,6 @@
 import csv
 import os
+import ast
 import matplotlib.pyplot as plt
 from collections import Counter
 from django.shortcuts import render, redirect
@@ -62,9 +63,15 @@ def read_csv_and_process(file_path, selected_column):
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            value = row.get(selected_column, '').strip().upper()
-            if value:  # Ensure value is not empty
-                defect_counts[value] += 1
+            # Parse the string representation of the list into an actual list
+            try:
+                defects = ast.literal_eval(row[selected_column])
+                if isinstance(defects, list):
+                    for defect in defects:
+                        defect_counts[defect.strip()] += 1
+            except (ValueError, SyntaxError):
+                # Handle cases where the column value is not a valid list
+                print(f"Error parsing {row[selected_column]}")
     return defect_counts
 
 def generate_bar_chart(defect_counts, file_name, selected_column):
@@ -72,6 +79,7 @@ def generate_bar_chart(defect_counts, file_name, selected_column):
     counts = [defect_counts[value] for value in values]
 
     fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12, 10))
     ax.bar(values, counts, color='skyblue')
     ax.set_xlabel('Values')
     ax.set_ylabel('Count')
