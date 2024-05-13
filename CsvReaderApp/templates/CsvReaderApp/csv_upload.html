@@ -16,12 +16,18 @@
         
         body {
             display: flex;
-            justify-content: center; 
-            align-items: center;     
-            height: 100vh;           
-            margin: 0;               
-            background: midnightblue;     
-            font-family: Arial, sans-serif; 
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: midnightblue;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: white; 
+            margin-bottom: 20px;  
         }
 
         form {
@@ -29,23 +35,21 @@
             background: white;
             border: 1px solid #ccc;
             box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            width: 500px;  
         }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-        <a class="navbar-brand" href="#"></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-item nav-link active" href="#"> <span class="sr-only">(current)</span></a>
-            <a class="nav-item nav-link" href="#"></a>
-            <a class="nav-item nav-link" href="#"></a>
-          </div>
+            
         </div>
-      </nav>
+    </nav>
+
+    <h1>Upload CSV File Here:</h1>  
     <form action="{% url 'upload_file' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="csv_file" required>
